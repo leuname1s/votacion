@@ -1,0 +1,29 @@
+{
+    "cursos":{
+        "primero_A":10,
+        "segundo_A":20,
+        "tercero_c":31
+    },
+    "listas":{
+        "lista54":{
+            "imagen":"/resources/lista54.jpg",
+            "titulo":"Lista 54", 
+            "subtitulo":"Por un futuro mejor"
+        },
+        "lista30":{
+            "imagen":"/resources/lista30.png",
+            "titulo":"Lista 30", 
+            "subtitulo":"Estudiantes al frente"
+        },
+        "lista90":{
+            "imagen":"/resources/lista30.png",
+            "titulo":"Lista 30", 
+            "subtitulo":"Estudiantes al frente"
+        }
+    },
+    "server":{
+        "ipPrivada":"192.157.15.1",
+        "puerto":"9909",
+        "colaEspera":5
+    }
+}
