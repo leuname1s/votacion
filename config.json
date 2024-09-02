@@ -22,8 +22,8 @@
         }
     },
     "server":{
-        "ipPrivada":"192.157.15.1",
-        "puerto":"9909",
+        "ipPrivada":"127.0.0.1",
+        "puerto":9909,
         "colaEspera":5
     }
 }

@@ -1,9 +1,12 @@
 import socket
+import json
 
-def iniciar_servidor():
+
+    
+def iniciar_servidor(config):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('127.0.0.1', 9999))
-    server_socket.listen(5)
+    server_socket.bind((config["ipPrivada"], config["puerto"]))
+    server_socket.listen(config["colaEspera"])
     print("Servidor esperando conexiones...")
 
     votos = []
@@ -22,4 +25,7 @@ def iniciar_servidor():
     server_socket.close()
 
 if __name__ == "__main__":
-    iniciar_servidor()
+    with open("config.json","r") as archivo:
+        config = json.load(archivo)
+        config = config["server"]
+    iniciar_servidor(config)
