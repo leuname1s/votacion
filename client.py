@@ -2,6 +2,7 @@ import socket
 import json
 import customtkinter
 import tkinter
+import PIL
 
 class App(customtkinter.CTk):   
 
@@ -11,8 +12,27 @@ class App(customtkinter.CTk):
         self.title("Votacion")
         with open("config.json","r") as archivo:
             self.config = json.load(archivo)
-        #codigo = input("Introduce su codigo: ")
-        #verificacion = enviar_codigo(codigo)
+        self.columnconfigure((0),weight=1)
+        self.rowconfigure((0),weight=1)
+        #self.mainFrame = customtkinter.CTkFrame(self)
+        #self.mainFrame.grid(row=0,column=0,sticky="nsew")
+        #self.mainFrame.columnconfigure((0),weight=1)
+        self.codigoFrame = customtkinter.CTkFrame(self)
+        self.codigoFrame.grid(row=0,column=0,sticky="nsew")
+        self.codigoFrame.columnconfigure((0),weight=1)
+        self.codigoFrame.rowconfigure((0,2),weight=1)
+        label = customtkinter.CTkLabel(self.codigoFrame,text="Introduzca su codigo: ",font=("Arial Rounded MT Bold",24))
+        label.grid(row=0,column=0,sticky="s")
+        self.entry = customtkinter.CTkEntry(self.codigoFrame,font=("Arial Rounded MT Bold",24),justify="center",width=200)
+        self.entry.grid(row=1,column=0,pady=20)
+        self.button = customtkinter.CTkButton(self.codigoFrame,text="Aceptar",font=("Arial Rounded MT Bold",24))
+        self.button.grid(row=2,column=0,sticky="n")
+        
+        self.votacionFrame = customtkinter.CTkFrame(self)
+        #self.votacionFrame.grid(row=0,column=0,sticky="nsew")
+        self.votacionFrame.columnconfigure((0),weight=1)
+        
+
         
     def enviar_voto(self,voto,codigo):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,5 +70,6 @@ class App(customtkinter.CTk):
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"   
 app = App()
-app.after(10,lambda: app.state("zoomed"))
+#app.after(10,lambda: app.state("normal"))
+app.after(10,lambda: app.attributes("-fullscreen",True))
 app.mainloop()
