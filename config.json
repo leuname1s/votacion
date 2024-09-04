@@ -6,17 +6,32 @@
     },
     "listas":{
         "lista54":{
-            "imagen":"/resources/lista54.jpg",
+            "imagen":"imagenes/test.jpg",
             "titulo":"Lista 54", 
             "subtitulo":"Por un futuro mejor"
         },
         "lista30":{
-            "imagen":"/resources/lista30.png",
+            "imagen":"imagenes/test.jpg",
             "titulo":"Lista 30", 
             "subtitulo":"Estudiantes al frente"
         },
         "lista90":{
-            "imagen":"/resources/lista30.png",
+            "imagen":"imagenes/test.jpg",
+            "titulo":"Lista 30", 
+            "subtitulo":"Estudiantes al frente"
+        },
+        "lista91":{
+            "imagen":"imagenes/test.jpg",
+            "titulo":"Lista 30", 
+            "subtitulo":"Estudiantes al frente"
+        },
+        "lista92":{
+            "imagen":"imagenes/test.jpg",
+            "titulo":"Lista 30", 
+            "subtitulo":"Estudiantes al frente"
+        },
+        "lista1":{
+            "imagen":"imagenes/test.jpg",
             "titulo":"Lista 30", 
             "subtitulo":"Estudiantes al frente"
         }
