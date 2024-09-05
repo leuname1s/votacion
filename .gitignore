@@ -2,6 +2,7 @@ pyvenv.cfg
 Scripts
 Include
 database.db
+result.txt
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

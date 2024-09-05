@@ -19,21 +19,6 @@
             "imagen":"imagenes/test.jpg",
             "titulo":"Lista 30", 
             "subtitulo":"Estudiantes al frente"
-        },
-        "lista91":{
-            "imagen":"imagenes/test.jpg",
-            "titulo":"Lista 30", 
-            "subtitulo":"Estudiantes al frente"
-        },
-        "lista92":{
-            "imagen":"imagenes/test.jpg",
-            "titulo":"Lista 30", 
-            "subtitulo":"Estudiantes al frente"
-        },
-        "lista1":{
-            "imagen":"imagenes/test.jpg",
-            "titulo":"Lista 30", 
-            "subtitulo":"Estudiantes al frente"
         }
     },
     "server":{
