@@ -1,12 +1,13 @@
 import socket
 import json
 import customtkinter
-from tkinter import messagebox
-from random import shuffle
+from tkinter import messagebox,END
+from random import shuffle  
 from PIL import Image
 
+
+
 class App(customtkinter.CTk):   
-    
     def __init__(self):
         super().__init__()
         self.geometry("600x500")
@@ -15,11 +16,9 @@ class App(customtkinter.CTk):
             self.config = json.load(archivo)
         self.columnconfigure((0),weight=1)
         self.rowconfigure((0),weight=1)
-        #self.mainFrame = customtkinter.CTkFrame(self)
-        #self.mainFrame.grid(row=0,column=0,sticky="nsew")
-        #self.mainFrame.columnconfigure((0),weight=1)
+        self.codigo = ""
         self.codigoFrame = customtkinter.CTkFrame(self)
-        #self.codigoFrame.grid(row=0,column=0,sticky="nsew")
+        self.codigoFrame.grid(row=0,column=0,sticky="nsew")
         self.codigoFrame.columnconfigure((0),weight=1)
         self.codigoFrame.rowconfigure((0,2),weight=1)
         label = customtkinter.CTkLabel(self.codigoFrame,text="Introduzca su codigo: ",font=("Arial Rounded MT Bold",24))
@@ -30,7 +29,7 @@ class App(customtkinter.CTk):
         button.grid(row=2,column=0,sticky="n")
         
         self.votacionFrame = customtkinter.CTkFrame(self,fg_color="transparent")
-        self.votacionFrame.grid(row=0,column=0,sticky="nsew")
+        #self.votacionFrame.grid(row=0,column=0,sticky="nsew")
         self.votacionFrame.columnconfigure((0),weight=1)
         
         listas = []
@@ -72,7 +71,6 @@ class App(customtkinter.CTk):
             listas[2].grid(row=0,column=2)
             listas[3].grid(row=1,column=0,columnspan=2)
             listas[4].grid(row=1,column=1,columnspan=2)
-            
         elif len(listas) == 6:
             self.votacionFrame.columnconfigure((0,1,2),weight=1)
             self.votacionFrame.rowconfigure((0,1),weight=1)
@@ -93,9 +91,9 @@ class App(customtkinter.CTk):
 
         client_socket.send(json.dumps(data).encode())
         respuesta = client_socket.recv(1024).decode()
-        print(f"Respuesta del servidor: {respuesta}")   
-
         client_socket.close()   
+        
+        return respuesta
 
     def enviar_codigo(self,codigo):  
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -111,8 +109,10 @@ class App(customtkinter.CTk):
     
     def aceptarHandle(self):
         codigo = self.codigoEntry.get()
+        self.codigoEntry.delete(0,END)
         respuesta = self.enviar_codigo(codigo=codigo)
         if respuesta == "aceptado":
+            self.codigo = codigo
             self.codigoFrame.grid_forget()
             self.votacionFrame.grid(row=0,column=0,sticky="nsew")
         elif respuesta == "denegado":
@@ -120,11 +120,24 @@ class App(customtkinter.CTk):
         elif respuesta == "error":
             messagebox.showerror("error del servidor","ocurrio un error en el servidor. Por favor notifiquelo a las autoridades de la sala")
         
+    def votoHandle(self,voto,titulo):
+        if messagebox.askokcancel(f"Confirmar voto",f"Esta seguro de votar a {titulo}"):
+            respuesta = self.enviar_voto(voto,self.codigo) 
+            if respuesta == "aceptado":
+                messagebox.showinfo("Operacion satisfactoria","El voto fue emitido con exito. Muchas gracias")
+                self.votacionFrame.grid_forget()
+                self.codigoFrame.grid(row=0,column=0,sticky="nsew")
+            elif respuesta == "error":
+                messagebox.showerror("error del servidor","ocurrio un error en el servidor. Por favor notifiquelo a las autoridades de la sala")
+                
+                
 class listaFrame(customtkinter.CTkFrame):
     def __init__(self, master, name,titulo,subtitulo,imagen,size):
         super().__init__(master,cursor="hand2")
         self.columnconfigure((0),weight=1)
         self.bind("<Button-1>",self.clickHandle)
+        self.name = name
+        self.tittle = titulo
         imagen = Image.open(imagen)
         imagen = customtkinter.CTkImage(imagen,imagen,(500*size,500*size))
         imagenLabel = customtkinter.CTkLabel(self,image=imagen,text="")
@@ -138,10 +151,11 @@ class listaFrame(customtkinter.CTkFrame):
         label.grid(row=2,column=0,pady=(0,10),padx=10)
         
     def clickHandle(self,event):
-        print("aa")
-
+        app.votoHandle(self.name,self.tittle)
+        
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"   
+
 app = App()
 #app.after(10,lambda: app.attributes("-fullscreen",True))
 app.mainloop()
