@@ -3,6 +3,7 @@ Scripts
 Include
 database.db
 result.txt
+output
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
