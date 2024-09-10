@@ -24,7 +24,8 @@
     "server":{
         "ipPrivada":"127.0.0.1",
         "puerto":9909,
-        "colaEspera":5
+        "colaEspera":5,
+        "codigoPrueba":"121212"
     },
     "pc": 0
 }

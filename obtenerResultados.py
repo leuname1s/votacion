@@ -9,6 +9,8 @@ with open("config.json","r") as archivo:
 
 
 with open("result.txt","w") as archivo:
+    total = [0 for _ in config["listas"]]
+    total.append(0)
     tittleList = (x["titulo"] for x in config["listas"].values())
     header = "\t".join(tittleList)+"\tno Voto"
     # print(f"\t{header}")
@@ -16,6 +18,12 @@ with open("result.txt","w") as archivo:
     for cursoTabla in config["cursos"].keys():
         cur.execute(f"SELECT votos FROM {cursoTabla}")
         result = cur.fetchall()
-        total = sum(x[0] for x in result)
-        row = f"{cursoTabla}\t"+"\t".join((str(x[0]) for x in result))+f"\t{config["cursos"][cursoTabla]-total}\n"
+        result = [x[0] for x in result]
+        totalCurso = sum(result)
+        ausentes =  config["cursos"][cursoTabla]-totalCurso
+        for index,value in enumerate(result):
+            total[index] += value
+        total[-1] += ausentes
+        row = f"{cursoTabla}\t"+"\t".join(str(x) for x in result)+f"\t{ausentes}\n"
         archivo.write(row)
+    archivo.write(f"Total\t"+"\t".join(str(x) for x in total))

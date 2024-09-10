@@ -4,7 +4,7 @@ import customtkinter
 from tkinter import messagebox,END
 from random import shuffle  
 from PIL import Image
-
+import traceback
 
 
 class App(customtkinter.CTk):   
@@ -84,52 +84,79 @@ class App(customtkinter.CTk):
 
         
     def enviar_voto(self,voto,codigo):
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((self.config["server"]["ipPrivada"], self.config["server"]["puerto"]))  
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.connect((self.config["server"]["ipPrivada"], self.config["server"]["puerto"]))  
 
-        data = {"tipo" : "voto", "pc":self.config["pc"],"contenido":[voto,codigo]}   
+            data = {"tipo" : "voto", "pc":self.config["pc"],"contenido":[voto,codigo]}   
 
-        client_socket.send(json.dumps(data).encode())
-        respuesta = client_socket.recv(1024).decode()
-        client_socket.close()   
-        
-        return respuesta
+            client_socket.send(json.dumps(data).encode())
+            respuesta = client_socket.recv(1024).decode()
+            client_socket.close()   
+
+            return respuesta
+        except Exception as e:
+            error.write(f"error {type(e).__name__}\n , enviando voto")
+            error.write(f"args: {str(e.args)}\n")
+            error.write(f"{traceback.format_exc()}\n")
+            messagebox.showwarning(title="Error Inesperado",message="Por favor contactece con la autoridad de la sala")
+            error.write("\n---------------------\n")
 
     def enviar_codigo(self,codigo):  
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((self.config["server"]["ipPrivada"], self.config["server"]["puerto"]))
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.connect((self.config["server"]["ipPrivada"], self.config["server"]["puerto"]))
 
-        data = {"tipo" : "codigo", "pc":self.config["pc"],"contenido":codigo}
+            data = {"tipo" : "codigo", "pc":self.config["pc"],"contenido":codigo}
 
-        client_socket.send(json.dumps(data).encode())
-        respuesta = client_socket.recv(1024).decode()
-        print(f"Respuesta del servidor: {respuesta}")
-        client_socket.close()
-        return respuesta
+            client_socket.send(json.dumps(data).encode())
+            respuesta = client_socket.recv(1024).decode()
+            print(f"Respuesta del servidor: {respuesta}")
+            client_socket.close()
+            return respuesta
+        except Exception as e:
+            error.write(f"error {type(e).__name__}\n , enviando codigo")
+            error.write(f"args: {str(e.args)}\n")
+            error.write(f"{traceback.format_exc()}\n")
+            messagebox.showwarning(title="Error Inesperado",message="Por favor contactece con la autoridad de la sala")
+            error.write("\n---------------------\n")
     
     def aceptarHandle(self):
-        codigo = self.codigoEntry.get()
-        self.codigoEntry.delete(0,END)
-        respuesta = self.enviar_codigo(codigo=codigo)
-        if respuesta == "aceptado":
-            self.codigo = codigo
-            self.codigoFrame.grid_forget()
-            self.votacionFrame.grid(row=0,column=0,sticky="nsew")
-        elif respuesta == "denegado":
-            messagebox.showwarning("codigo erroneo","El codigo que ingreso no fue aceptado, intente de nuevo")
-        elif respuesta == "error":
-            messagebox.showerror("error del servidor","ocurrio un error en el servidor. Por favor notifiquelo a las autoridades de la sala")
-        
-    def votoHandle(self,voto,titulo):
-        if messagebox.askokcancel(f"Confirmar voto",f"Esta seguro de votar a {titulo}"):
-            respuesta = self.enviar_voto(voto,self.codigo) 
+        try:
+            codigo = self.codigoEntry.get()
+            self.codigoEntry.delete(0,END)
+            respuesta = self.enviar_codigo(codigo=codigo)
             if respuesta == "aceptado":
-                messagebox.showinfo("Operacion satisfactoria","El voto fue emitido con exito. Muchas gracias")
-                self.votacionFrame.grid_forget()
-                self.codigoFrame.grid(row=0,column=0,sticky="nsew")
+                self.codigo = codigo
+                self.codigoFrame.grid_forget()
+                self.votacionFrame.grid(row=0,column=0,sticky="nsew")
+            elif respuesta == "denegado":
+                messagebox.showwarning("codigo erroneo","El codigo que ingreso no fue aceptado, intente de nuevo")
             elif respuesta == "error":
                 messagebox.showerror("error del servidor","ocurrio un error en el servidor. Por favor notifiquelo a las autoridades de la sala")
-                
+        except Exception as e:
+            error.write(f"error {type(e).__name__}\n , al aceptar codigo (boton aceptar)")
+            error.write(f"args: {str(e.args)}\n")
+            error.write(f"{traceback.format_exc()}\n")
+            messagebox.showwarning(title="Error Inesperado",message="Por favor contactece con la autoridad de la sala")
+            error.write("\n---------------------\n")
+            
+    def votoHandle(self,voto,titulo):
+        try:
+            if messagebox.askokcancel(f"Confirmar voto",f"Esta seguro de votar a {titulo}"):
+                respuesta = self.enviar_voto(voto,self.codigo) 
+                if respuesta == "aceptado":
+                    messagebox.showinfo("Operacion satisfactoria","El voto fue emitido con exito. Muchas gracias")
+                    self.votacionFrame.grid_forget()
+                    self.codigoFrame.grid(row=0,column=0,sticky="nsew")
+                elif respuesta == "error":
+                    messagebox.showerror("error del servidor","ocurrio un error en el servidor. Por favor notifiquelo a las autoridades de la sala")
+        except Exception as e:
+            error.write(f"error {type(e).__name__}\n , al confirmar voto")
+            error.write(f"args: {str(e.args)}\n")
+            error.write(f"{traceback.format_exc()}\n")
+            messagebox.showwarning(title="Error Inesperado",message="Por favor contactece con la autoridad de la sala")
+            error.write("\n---------------------\n")
                 
 class listaFrame(customtkinter.CTkFrame):
     def __init__(self, master, name,titulo,subtitulo,imagen,size):
@@ -158,4 +185,5 @@ customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard),
 
 app = App()
 #app.after(10,lambda: app.attributes("-fullscreen",True))
-app.mainloop()
+with open("errores.txt","w") as error:
+    app.mainloop()
