@@ -1,9 +1,12 @@
+from datetime import datetime
 import socket
 import json
 import sqlite3
 import traceback
-    
-class servidor():
+import customtkinter
+import threading
+
+class servidor(customtkinter.CTk):
     def verificar_codigo(self,codigo):
         try:
             conexion = sqlite3.connect('database.db')
@@ -50,71 +53,99 @@ class servidor():
             return 1    #operacion exitosa
         except Exception as e:
             return 0
-    def __init__(self,config):
-        self.codigoPrueba = config["codigoPrueba"]
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind((config["ipPrivada"], config["puerto"]))
-        server_socket.listen(config["colaEspera"])
-        print("Servidor esperando conexiones...")
+        
+    def setServer(self):
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.bind((config["ipPrivada"], config["puerto"]))
+            server_socket.listen(config["colaEspera"])
+            self.insertLog("Servidor esperando conexiones...")
 
 
-        while True:
-            try:
-                client_socket, addr = server_socket.accept()
+            while True:
+                try:
+                    client_socket, addr = server_socket.accept()
 
-                data = client_socket.recv(1024).decode()
+                    data = client_socket.recv(1024).decode()
 
-                data = json.loads(data)
+                    data = json.loads(data)
 
-                pc = data["pc"]
-                #print(f"coneccion desde la pc {pc}")
+                    pc = data["pc"]
+                    #self.insertLog(f"coneccion desde la pc {pc}")
 
-                if data["tipo"] == "codigo":
-                    codigo = data["contenido"].upper()
-                    if codigo == self.codigoPrueba:
-                        print(f"codigo de prueba desde la PC {data["pc"]}")
-                        client_socket.send("aceptado".encode())
-                        continue
-                    else:
-                        verificacion = self.verificar_codigo(codigo)
-                        if verificacion == 1:
-                            print(f"codigo verificado correctamente desde la PC {data["pc"]}")
+                    if data["tipo"] == "codigo":
+                        codigo = data["contenido"].upper()
+                        if codigo == self.codigoPrueba:
+                            self.insertLog(f"codigo de prueba desde la PC {data["pc"]}")
                             client_socket.send("aceptado".encode())
-                        elif verificacion == 0:
-                            print(f"!codigo denegado desde la PC {data["pc"]}")
-                            client_socket.send("denegado".encode())
-                        elif verificacion == "error":
-                            print(f"!!!ocurrio un error en la verificacion del codigo de la pc {data["pc"]}")
+                            continue
+                        else:
+                            verificacion = self.verificar_codigo(codigo)
+                            if verificacion == 1:
+                                self.insertLog(f"codigo verificado correctamente desde la PC {data["pc"]}")
+                                client_socket.send("aceptado".encode())
+                            elif verificacion == 0:
+                                self.insertLog(f"!codigo denegado desde la PC {data["pc"]}")
+                                client_socket.send("denegado".encode())
+                            elif verificacion == "error":
+                                self.insertLog(f"!!!ocurrio un error en la verificacion del codigo de la pc {data["pc"]}")
+                                client_socket.send("error".encode())
+
+                    elif data["tipo"] == "voto":
+                        codigo = data["contenido"][1].upper()
+                        voto = data["contenido"][0]
+                        if codigo == self.codigoPrueba:
+                            self.insertLog(f"codigo de prueba desde la PC {data["pc"]}")
+                            client_socket.send("aceptado".encode())
+                        elif self.votar(voto,codigo):
+                            self.insertLog(f"Voto emitido desde la pc {data["pc"]}")
+                            client_socket.send("aceptado".encode())
+                        else:
+                            self.insertLog(f"error al emitir el voto desde la pc{data["pc"]}")
                             client_socket.send("error".encode())
 
-                elif data["tipo"] == "voto":
-                    codigo = data["contenido"][1].upper()
-                    voto = data["contenido"][0]
-                    if codigo == self.codigoPrueba:
-                        print(f"codigo de prueba desde la PC {data["pc"]}")
-                        client_socket.send("aceptado".encode())
-                    elif self.votar(voto,codigo):
-                        print(f"Voto emitido desde la pc {data["pc"]}")
-                        client_socket.send("aceptado".encode())
-                    else:
-                        print(f"error al emitir el voto desde la pc{data["pc"]}")
-                        client_socket.send("error".encode())
 
-
-                #client_socket.send("Voto recibido".encode())
-                client_socket.close()
-            except Exception as e:
-                print(f"error en el loop principal: {type(e).__name__}\n , ")
-                print(f"args: {str(e.args)}\n")
-                print(f"{traceback.format_exc()}\n")
-                #messagebox.showwarning(title="Error Inesperado",message="Por favor contactece con la autoridad de la sala")
-                print("\n---------------------\n")
-
-
+                    #client_socket.send("Voto recibido".encode())
+                    client_socket.close()
+                except Exception as e:
+                    self.insertLog(f"error en el loop principal: {type(e).__name__}\n , ")
+                    self.insertLog(f"args: {str(e.args)}\n")
+                    self.insertLog(f"{traceback.format_exc()}\n")
+                    #messagebox.showwarning(title="Error Inesperado",message="Por favor contactece con la autoridad de la sala")
+                    self.insertLog("\n---------------------\n")
+                    
+    def insertLog(self,text):
+        hora = datetime.today().strftime("%H:%M  / ")
+        self.logFrame.insert("1.0",hora+text+"\n")  
+        
+    def __init__(self,config):
+        super().__init__()
+        self.title("servidor")
+        self.geometry("400x400+0+0")
+        self.state("zoomed")
+        
+        self.codigoPrueba = config["codigoPrueba"]
+        
+        self.logFrame = customtkinter.CTkTextbox(self,fg_color="red")
+        self.mainFrame = customtkinter.CTkScrollableFrame(self,fg_color="green")
+        
+        self.columnconfigure((0),weight=1)
+        self.rowconfigure((0),weight=1)
+        self.rowconfigure((1),weight=4)
+        
+        self.logFrame.grid(row=0,column=0,sticky="nsew")
+        self.mainFrame.grid(row=1,column=0,sticky="nsew")
+        
+        
+        server_thread = threading.Thread(target=self.setServer, daemon=True)
+        server_thread.start()
+        #self.setServer()
 if __name__ == "__main__":
     with open("config.json","r") as archivo:
         config = json.load(archivo)
         config = config["server"]
     server = servidor(config)
+    server.mainloop()
+    #server.after(10,lambda: server.attributes("-fullscreen",True))
+    
     
     
