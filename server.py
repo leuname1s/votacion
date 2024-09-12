@@ -5,7 +5,8 @@ import sqlite3
 import traceback
 import customtkinter
 import threading
-
+from PIL import Image
+from tkinter import CENTER
 class servidor(customtkinter.CTk):
     def verificar_codigo(self,codigo):
         try:
@@ -37,8 +38,6 @@ class servidor(customtkinter.CTk):
             print(f"error al verificar codigo")
             return "error"
             
-
-    
     def votar(self,voto,codigo):
         try:
             conexion = sqlite3.connect('database.db')
@@ -63,6 +62,8 @@ class servidor(customtkinter.CTk):
 
             while True:
                 try:
+
+                    
                     client_socket, addr = server_socket.accept()
 
                     data = client_socket.recv(1024).decode()
@@ -71,22 +72,35 @@ class servidor(customtkinter.CTk):
 
                     pc = data["pc"]
                     #self.insertLog(f"coneccion desde la pc {pc}")
-
+                    if pc in self.pcs:
+                        pc = self.pcs[pc]
+                    else:
+                        self.pcs[pc] = compuFrame(self.mainFrame,pc,fg_color="#1D1E1E")
+                        pc = self.pcs[pc]
+                        pc.grid(row=self.row,column=self.column,padx=10,pady=10)
+                        self.column +=1
+                        if self.column > 6:
+                            self.column = 0
+                            self.row += 1
                     if data["tipo"] == "codigo":
                         codigo = data["contenido"].upper()
                         if codigo == self.codigoPrueba:
                             self.insertLog(f"codigo de prueba desde la PC {data["pc"]}")
+                            pc.changeState("prueba")
                             client_socket.send("aceptado".encode())
                             continue
                         else:
                             verificacion = self.verificar_codigo(codigo)
                             if verificacion == 1:
                                 self.insertLog(f"codigo verificado correctamente desde la PC {data["pc"]}")
+                                pc.changeState("valido")
                                 client_socket.send("aceptado".encode())
                             elif verificacion == 0:
                                 self.insertLog(f"!codigo denegado desde la PC {data["pc"]}")
+                                pc.changeState("denegado")
                                 client_socket.send("denegado".encode())
                             elif verificacion == "error":
+                                pc.changeState("empty")
                                 self.insertLog(f"!!!ocurrio un error en la verificacion del codigo de la pc {data["pc"]}")
                                 client_socket.send("error".encode())
 
@@ -95,12 +109,15 @@ class servidor(customtkinter.CTk):
                         voto = data["contenido"][0]
                         if codigo == self.codigoPrueba:
                             self.insertLog(f"codigo de prueba desde la PC {data["pc"]}")
+                            pc.changeState("prueba")
                             client_socket.send("aceptado".encode())
                         elif self.votar(voto,codigo):
                             self.insertLog(f"Voto emitido desde la pc {data["pc"]}")
+                            pc.changeState("voto")
                             client_socket.send("aceptado".encode())
                         else:
                             self.insertLog(f"error al emitir el voto desde la pc{data["pc"]}")
+                            pc.changeState("empty")
                             client_socket.send("error".encode())
 
 
@@ -120,31 +137,85 @@ class servidor(customtkinter.CTk):
     def __init__(self,config):
         super().__init__()
         self.title("servidor")
-        self.geometry("400x400+0+0")
         self.state("zoomed")
+        self.geometry("400x400+0+0")
         
         self.codigoPrueba = config["codigoPrueba"]
-        
-        self.logFrame = customtkinter.CTkTextbox(self,fg_color="red")
-        self.mainFrame = customtkinter.CTkScrollableFrame(self,fg_color="green")
+        self.pcs = dict()
+        self.column=0
+        self.row=0
+        self.logFrame = customtkinter.CTkTextbox(self,)
+        self.mainFrame = customtkinter.CTkScrollableFrame(self,)
         
         self.columnconfigure((0),weight=1)
         self.rowconfigure((0),weight=1)
         self.rowconfigure((1),weight=4)
         
-        self.logFrame.grid(row=0,column=0,sticky="nsew")
-        self.mainFrame.grid(row=1,column=0,sticky="nsew")
-        
+        self.logFrame.grid(row=0,column=0,sticky="nsew",padx=20,pady=10)
+        self.mainFrame.grid(row=1,column=0,sticky="nsew",padx=20,pady=10)
         
         server_thread = threading.Thread(target=self.setServer, daemon=True)
         server_thread.start()
-        #self.setServer()
+
+class compuFrame(customtkinter.CTkFrame):
+    def createEntry(self,type):
+        if type == "denegado":
+            text = "Codigo Denegado"
+            color = "red"
+        elif type == "valido":
+            text = "Codigo Valido"
+            color = "blue"
+        elif type == "prueba":
+            text = "Codigo de Prueba"
+            color = "yellow"
+        elif type == "voto":
+            text = "Voto Recibido"
+            color = "green"
+        elif type == "empty":
+            color = "#1D1E1E"
+            text = ""
+        entry = customtkinter.CTkEntry(self,250,60,justify="center",border_color=color,border_width=7,font=("Arial Rounded MT Bold",25),fg_color="transparent")
+        entry.insert(0,text)
+        entry.configure(state="disabled")
+        return entry
+    
+    def __init__(self,master,pc,**kwargs):
+        super().__init__(master,**kwargs)
+        imagen = customtkinter.CTkImage(light_image=Image.open("pc.png"),
+                                  dark_image=Image.open("pc.png"),
+                                  size=(250,250))
+        label = customtkinter.CTkLabel(self,image=imagen,text="",font=("Arial Rounded MT Bold",24))
+        label.grid(row=0,column=0,padx=10,pady=10)
+        label2 = customtkinter.CTkLabel(self,text=str(pc),font=("Arial Rounded MT Bold",60))
+        label2.grid(row=0,column=0,padx=10,pady=(0,70))
+
+        self.state = self.createEntry("empty")
+        self.lastState = self.createEntry("empty")
+        
+        self.state.grid(row=1,column=0,padx=10,pady=10)
+        self.lastState.grid(row=2,column=0,padx=10,pady=(0,10))
+
+    def changeState(self,type):
+        self.lastState = self.state
+        self.lastState.grid(row=2,column=0,padx=10,pady=(0,10))
+        self.state = self.createEntry(type)
+        self.state.grid(row=1,column=0,padx=10,pady=10)
+        border = self.state.cget("border_color")
+        print(border)
+        self.configure(border_width=5)
+        self.configure(border_color=border)
+        self.after(200,lambda: self.configure(border_color="#1D1E1E"))
+        self.after(400,lambda: self.configure(border_color=border))
+        self.after(600,lambda: self.configure(border_color="#1D1E1E"))
+        self.after(800,lambda: self.configure(border_width=0))
+        
 if __name__ == "__main__":
     with open("config.json","r") as archivo:
         config = json.load(archivo)
         config = config["server"]
     server = servidor(config)
     server.mainloop()
+    server.after(10,lambda: server.state("zoomed"))
     #server.after(10,lambda: server.attributes("-fullscreen",True))
     
     
