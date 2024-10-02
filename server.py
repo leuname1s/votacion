@@ -58,7 +58,7 @@ class servidor(customtkinter.CTk):
             server_socket.bind((config["ipPrivada"], config["puerto"]))
             server_socket.listen(config["colaEspera"])
             self.insertLog("Servidor esperando conexiones...")
-
+            lastPc = 0
 
             while True:
                 try:
@@ -69,19 +69,30 @@ class servidor(customtkinter.CTk):
                     data = client_socket.recv(1024).decode()
 
                     data = json.loads(data)
-
-                    pc = data["pc"]
-                    #self.insertLog(f"coneccion desde la pc {pc}")
-                    if pc in self.pcs:
-                        pc = self.pcs[pc]
-                    else:
-                        self.pcs[pc] = compuFrame(self.mainFrame,pc,fg_color="#1D1E1E")
-                        pc = self.pcs[pc]
+                    if data["tipo"] == "newPc":
+                        lastPc += 1
+                        client_socket.send(str(lastPc).encode())
+                        self.pcs[str(lastPc)] = compuFrame(self.mainFrame,str(lastPc),fg_color="#1D1E1E")
+                        pc = self.pcs[str(lastPc)]
                         pc.grid(row=self.row,column=self.column,padx=10,pady=10)
                         self.column +=1
                         if self.column > 6:
                             self.column = 0
                             self.row += 1
+                    else:
+                        pc = data["pc"]
+                    #self.insertLog(f"coneccion desde la pc {pc}")
+                    if pc in self.pcs:
+                        pc = self.pcs[pc]
+                    else:
+                        self.insertLog(f"PC no registrada en ip {addr}")
+                        # self.pcs[pc] = compuFrame(self.mainFrame,pc,fg_color="#1D1E1E")
+                        # pc = self.pcs[pc]
+                        # pc.grid(row=self.row,column=self.column,padx=10,pady=10)
+                        # self.column +=1
+                        # if self.column > 6:
+                        #     self.column = 0
+                        #     self.row += 1
                     if data["tipo"] == "codigo":
                         codigo = data["contenido"].upper()
                         if codigo == self.codigoPrueba:

@@ -8,6 +8,26 @@ import traceback
 
 
 class App(customtkinter.CTk):   
+    def obtener_codigo_pc(self):
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.connect((self.config["server"]["ipPrivada"], self.config["server"]["puerto"]))  
+            
+            data = {"tipo" : "newPc"}   
+            
+            client_socket.send(json.dumps(data).encode())
+            respuesta = client_socket.recv(1024).decode()
+            client_socket.close()  
+            return respuesta 
+            
+
+        except Exception as e:
+            error.write(f"error {type(e).__name__}\n , obteniendo codigo pc")
+            error.write(f"args: {str(e.args)}\n")
+            error.write(f"{traceback.format_exc()}\n")
+            messagebox.showwarning(title="Error Inesperado",message="Por favor contactece con la autoridad de la sala")
+            error.write("\n---------------------\n")
+        
     def __init__(self):
         super().__init__()
         self.geometry("600x500")
@@ -81,14 +101,14 @@ class App(customtkinter.CTk):
             listas[4].grid(row=1,column=1)
             listas[5].grid(row=1,column=2)
 
+        self.pc = self.obtener_codigo_pc()
 
-        
     def enviar_voto(self,voto,codigo):
         try:
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect((self.config["server"]["ipPrivada"], self.config["server"]["puerto"]))  
 
-            data = {"tipo" : "voto", "pc":self.config["pc"],"contenido":[voto,codigo]}   
+            data = {"tipo" : "voto", "pc":self.pc,"contenido":[voto,codigo]}   
 
             client_socket.send(json.dumps(data).encode())
             respuesta = client_socket.recv(1024).decode()
@@ -107,7 +127,7 @@ class App(customtkinter.CTk):
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect((self.config["server"]["ipPrivada"], self.config["server"]["puerto"]))
 
-            data = {"tipo" : "codigo", "pc":self.config["pc"],"contenido":codigo}
+            data = {"tipo" : "codigo", "pc":self.pc,"contenido":codigo}
 
             client_socket.send(json.dumps(data).encode())
             respuesta = client_socket.recv(1024).decode()
