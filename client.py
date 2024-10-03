@@ -22,11 +22,7 @@ class App(customtkinter.CTk):
             
 
         except Exception as e:
-            error.write(f"error {type(e).__name__}\n , obteniendo codigo pc")
-            error.write(f"args: {str(e.args)}\n")
-            error.write(f"{traceback.format_exc()}\n")
-            messagebox.showwarning(title="Error Inesperado",message="Por favor contactece con la autoridad de la sala")
-            error.write("\n---------------------\n")
+            return "error"
         
     def __init__(self):
         super().__init__()
@@ -102,6 +98,9 @@ class App(customtkinter.CTk):
             listas[5].grid(row=1,column=2)
 
         self.pc = self.obtener_codigo_pc()
+        if self.pc == "error":
+            messagebox.showerror("error","No se establecio coneccion con el servidor")
+            self.destroy()
 
     def enviar_voto(self,voto,codigo):
         try:
