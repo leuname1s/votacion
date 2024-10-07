@@ -33,7 +33,7 @@ def generar_base_de_datos(config):
             for _ in range(curso[1]):
                 while True:
                     codigo = generar_codigo_aleatorio()
-                    if codigo not in codigos:
+                    if codigo not in codigos and codigo != config["server"]["codigoPrueba"]:
                         codigos.add(codigo)
                         break
                     #else: print("codigo repetido")
