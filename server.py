@@ -7,6 +7,10 @@ import customtkinter
 import threading
 from PIL import Image
 from tkinter import CENTER
+
+customtkinter.set_default_color_theme("dark-blue")
+customtkinter.set_appearance_mode("dark")
+
 class servidor(customtkinter.CTk):
     def verificar_codigo(self,codigo):
         try:
@@ -35,7 +39,7 @@ class servidor(customtkinter.CTk):
             conexion.close()
             return resultado
         except Exception as e:
-            print(f"error al verificar codigo")
+            self.insertLog(f"error al verificar codigo")
             return "error"
             
     def votar(self,voto,codigo):
@@ -72,11 +76,11 @@ class servidor(customtkinter.CTk):
                     if data["tipo"] == "newPc":
                         lastPc += 1
                         client_socket.send(str(lastPc).encode())
-                        self.pcs[str(lastPc)] = compuFrame(self.mainFrame,str(lastPc),fg_color="#1D1E1E")
+                        self.pcs[str(lastPc)] = compuFrame(self.mainFrame,str(lastPc),size=config["size"],fg_color="#1D1E1E")
                         pc = self.pcs[str(lastPc)]
                         pc.grid(row=self.row,column=self.column,padx=10,pady=10)
                         self.column +=1
-                        if self.column > 6:
+                        if self.column > config["columnas"]:
                             self.column = 0
                             self.row += 1
                     else:
@@ -185,34 +189,35 @@ class compuFrame(customtkinter.CTkFrame):
         elif type == "empty":
             color = "#1D1E1E"
             text = ""
-        entry = customtkinter.CTkEntry(self,250,60,justify="center",border_color=color,border_width=7,font=("Arial Rounded MT Bold",25),fg_color="transparent")
+        entry = customtkinter.CTkEntry(self,250*self.size,60*self.size,justify="center",border_color=color,border_width=7*self.size,font=("Arial Rounded MT Bold",25*self.size),fg_color="transparent")
         entry.insert(0,text)
         entry.configure(state="disabled")
         return entry
     
-    def __init__(self,master,pc,**kwargs):
+    def __init__(self,master,pc,size=1,**kwargs):
         super().__init__(master,**kwargs)
+        self.size = size
         imagen = customtkinter.CTkImage(light_image=Image.open("pc.png"),
                                   dark_image=Image.open("pc.png"),
-                                  size=(250,250))
-        label = customtkinter.CTkLabel(self,image=imagen,text="",font=("Arial Rounded MT Bold",24))
-        label.grid(row=0,column=0,padx=10,pady=10)
-        label2 = customtkinter.CTkLabel(self,text=str(pc),font=("Arial Rounded MT Bold",60))
-        label2.grid(row=0,column=0,padx=10,pady=(0,70))
+                                  size=(250*self.size,250*self.size))
+        label = customtkinter.CTkLabel(self,image=imagen,text="",font=("Arial Rounded MT Bold",24*self.size))
+        label.grid(row=0,column=0,padx=10*self.size,pady=10*self.size)
+        label2 = customtkinter.CTkLabel(self,text=str(pc),font=("Arial Rounded MT Bold",60*self.size))
+        label2.grid(row=0,column=0,padx=10*self.size,pady=(0*self.size,70*self.size))
 
         self.state = self.createEntry("empty")
         self.lastState = self.createEntry("empty")
         
-        self.state.grid(row=1,column=0,padx=10,pady=10)
-        self.lastState.grid(row=2,column=0,padx=10,pady=(0,10))
+        self.state.grid(row=1,column=0,padx=10*self.size,pady=10*self.size)
+        self.lastState.grid(row=2,column=0,padx=10*self.size,pady=(0,10*self.size))
 
     def changeState(self,type):
         self.lastState = self.state
-        self.lastState.grid(row=2,column=0,padx=10,pady=(0,10))
+        self.lastState.grid(row=2,column=0,padx=10*self.size,pady=(0,10*self.size))
         self.state = self.createEntry(type)
-        self.state.grid(row=1,column=0,padx=10,pady=10)
+        self.state.grid(row=1,column=0,padx=10*self.size,pady=10*self.size)
         border = self.state.cget("border_color")
-        print(border)
+
         self.configure(border_width=5)
         self.configure(border_color=border)
         self.after(200,lambda: self.configure(border_color="#1D1E1E"))
@@ -226,8 +231,8 @@ if __name__ == "__main__":
         config = config["server"]
     server = servidor(config)
     server.mainloop()
-    server.after(10,lambda: server.state("zoomed"))
-    #server.after(10,lambda: server.attributes("-fullscreen",True))
+    server.after(50,lambda: server.state("zoomed"))
+    server.after(50,lambda: server.attributes("-fullscreen",True))
     
     
     

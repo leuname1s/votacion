@@ -26,6 +26,8 @@
         "ipPuertoServer":"0.0.0.0",
         "puerto":9909,
         "colaEspera":5,
-        "codigoPrueba":"121212"
+        "codigoPrueba":"121212",
+        "size":0.75,
+        "columnas":6
     }
 }

@@ -203,6 +203,6 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"   
 
 app = App()
-#app.after(10,lambda: app.attributes("-fullscreen",True))
+app.after(10,lambda: app.attributes("-fullscreen",True))
 with open("errores.txt","w") as error:
     app.mainloop()
