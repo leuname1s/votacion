@@ -159,7 +159,7 @@ class servidor(customtkinter.CTk):
         self.pcs = dict()
         self.column=0
         self.row=0
-        self.logFrame = customtkinter.CTkTextbox(self,)
+        self.logFrame = customtkinter.CTkTextbox(self)
         self.mainFrame = customtkinter.CTkScrollableFrame(self,)
         
         self.columnconfigure((0),weight=1)

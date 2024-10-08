@@ -28,18 +28,28 @@ def generar_base_de_datos(config):
         con.commit()
         for lista in listas:
             cur.execute(f"INSERT INTO {curso[0]} VALUES (?, ?)",(lista,0))
-            
-        with open(f"codigos/{curso[0]}.txt","w") as archivo:
+        if curso[0] != "excepciones":
+            with open(f"codigos/{curso[0]}.txt","w") as archivo:
+                for _ in range(curso[1]):
+                    while True:
+                        codigo = generar_codigo_aleatorio()
+                        if codigo not in codigos:
+                            codigos.add(codigo)
+                            break
+                        #else: print("codigo repetido")
+                    cur.execute(f"INSERT INTO codigos VALUES (?,?,?)",(codigo,curso[0],0))
+                    con.commit()
+                    archivo.write(f"{codigo}\n")
+        else:
             for _ in range(curso[1]):
                 while True:
                     codigo = generar_codigo_aleatorio()
-                    if codigo not in codigos and codigo != config["server"]["codigoPrueba"]:
+                    if codigo not in codigos:
                         codigos.add(codigo)
                         break
                     #else: print("codigo repetido")
                 cur.execute(f"INSERT INTO codigos VALUES (?,?,?)",(codigo,curso[0],0))
                 con.commit()
-                archivo.write(f"{codigo}\n")
             
 generar_base_de_datos(config)
     

@@ -2,7 +2,8 @@
     "cursos":{
         "primero_A":10,
         "segundo_A":20,
-        "tercero_c":31
+        "tercero_c":31,
+        "excepciones":20
     },
     "listas":{
         "lista54":{
@@ -19,6 +20,11 @@
             "imagen":"imagenes/test.jpg",
             "titulo":"Lista 90", 
             "subtitulo":"Estudiantes al frente"
+        },
+        "votoBlanco":{
+            "imagen":"imagenes/votoBlanco.jpg", 
+            "titulo":"Voto en blanco", 
+            "subtitulo":" - "
         }
     },
     "server":{
