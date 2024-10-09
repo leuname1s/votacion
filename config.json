@@ -20,11 +20,6 @@
             "imagen":"imagenes/test.jpg",
             "titulo":"Lista 90", 
             "subtitulo":"Estudiantes al frente"
-        },
-        "votoBlanco":{
-            "imagen":"imagenes/votoBlanco.jpg", 
-            "titulo":"Voto en blanco", 
-            "subtitulo":" - "
         }
     },
     "server":{

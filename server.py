@@ -147,7 +147,9 @@ class servidor(customtkinter.CTk):
                     
     def insertLog(self,text):
         hora = datetime.today().strftime("%H:%M  / ")
-        self.logFrame.insert("1.0",hora+text+"\n")  
+        self.logFrame.configure(state="normal")
+        self.logFrame.insert("1.0",hora+text+"\n")
+        self.logFrame.configure(state="disabled")  
         
     def __init__(self,config):
         super().__init__()
@@ -159,7 +161,7 @@ class servidor(customtkinter.CTk):
         self.pcs = dict()
         self.column=0
         self.row=0
-        self.logFrame = customtkinter.CTkTextbox(self)
+        self.logFrame = customtkinter.CTkTextbox(self,state="disabled")
         self.mainFrame = customtkinter.CTkScrollableFrame(self,)
         
         self.columnconfigure((0),weight=1)

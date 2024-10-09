@@ -31,7 +31,8 @@ with open("result.txt","w") as archivo:
             ausentes =  config["cursos"][cursoTabla]-totalCurso
             for index,value in enumerate(result):
                 total[index] += value
-            total[-1] += ausentes
+            if cursoTabla != "excepciones":
+                total[-1] += ausentes
             row = f"{cursoTabla}\t"+"\t".join(str(x) for x in result)+f"\t{ausentes}\n"
             csvRow = ["",""]
             archivo.write(row)
