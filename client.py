@@ -28,7 +28,7 @@ class App(customtkinter.CTk):
         super().__init__()
         self.geometry("600x500")
         self.title("Votacion")
-        with open("config.json","r") as archivo:
+        with open("config.json","r",encoding="utf-8") as archivo:
             self.config = json.load(archivo)
         self.columnconfigure((0),weight=1)
         self.rowconfigure((0),weight=1)
@@ -48,7 +48,7 @@ class App(customtkinter.CTk):
         #self.votacionFrame.grid(row=0,column=0,sticky="nsew")
         self.votacionFrame.columnconfigure((0),weight=1)
         
-        listas = []
+        self.listas = []
         lenListas = len(self.config["listas"])
         size = {
             2:1,
@@ -59,43 +59,8 @@ class App(customtkinter.CTk):
         }
         for lista in self.config["listas"].items():
             lista_frame = listaFrame(self.votacionFrame,lista[0],lista[1]["titulo"],lista[1]["subtitulo"],lista[1]["imagen"],size[lenListas])
-            listas.append(lista_frame)
-        shuffle(listas)
-        if len(listas) == 2:
-            self.votacionFrame.columnconfigure((0,1),weight=1)
-            self.votacionFrame.rowconfigure((0),weight=1)
-            listas[0].grid(row=0,column=0)
-            listas[1].grid(row=0,column=1)
-        elif len(listas) == 3:
-            self.votacionFrame.columnconfigure((0,1,2),weight=1)
-            self.votacionFrame.rowconfigure((0),weight=1)
-            listas[0].grid(row=0,column=0)
-            listas[1].grid(row=0,column=1)
-            listas[2].grid(row=0,column=2)
-        elif len(listas) == 4:
-            self.votacionFrame.columnconfigure((0,1),weight=1)
-            self.votacionFrame.rowconfigure((0,1),weight=1)
-            listas[0].grid(row=0,column=0)
-            listas[1].grid(row=0,column=1)
-            listas[2].grid(row=1,column=0)
-            listas[3].grid(row=1,column=1)
-        elif len(listas) == 5:
-            self.votacionFrame.columnconfigure((0,1,2),weight=1)
-            self.votacionFrame.rowconfigure((0,1),weight=1)
-            listas[0].grid(row=0,column=0)
-            listas[1].grid(row=0,column=1)
-            listas[2].grid(row=0,column=2)
-            listas[3].grid(row=1,column=0,columnspan=2)
-            listas[4].grid(row=1,column=1,columnspan=2)
-        elif len(listas) == 6:
-            self.votacionFrame.columnconfigure((0,1,2),weight=1)
-            self.votacionFrame.rowconfigure((0,1),weight=1)
-            listas[0].grid(row=0,column=0)
-            listas[1].grid(row=0,column=1)
-            listas[2].grid(row=0,column=2)
-            listas[3].grid(row=1,column=0)
-            listas[4].grid(row=1,column=1)
-            listas[5].grid(row=1,column=2)
+            self.listas.append(lista_frame)
+        
 
         self.pc = self.obtener_codigo_pc()
         if self.pc == "error":
@@ -148,6 +113,42 @@ class App(customtkinter.CTk):
             if respuesta == "aceptado":
                 self.codigo = codigo
                 self.codigoFrame.grid_forget()
+                shuffle(self.listas)
+                if len(self.listas) == 2:
+                    self.votacionFrame.columnconfigure((0,1),weight=1)
+                    self.votacionFrame.rowconfigure((0),weight=1)
+                    self.listas[0].grid(row=0,column=0)
+                    self.listas[1].grid(row=0,column=1)
+                elif len(self.listas) == 3:
+                    self.votacionFrame.columnconfigure((0,1,2),weight=1)
+                    self.votacionFrame.rowconfigure((0),weight=1)
+                    self.listas[0].grid(row=0,column=0)
+                    self.listas[1].grid(row=0,column=1)
+                    self.listas[2].grid(row=0,column=2)
+                elif len(self.listas) == 4:
+                    self.votacionFrame.columnconfigure((0,1),weight=1)
+                    self.votacionFrame.rowconfigure((0,1),weight=1)
+                    self.listas[0].grid(row=0,column=0)
+                    self.listas[1].grid(row=0,column=1)
+                    self.listas[2].grid(row=1,column=0)
+                    self.listas[3].grid(row=1,column=1)
+                elif len(self.listas) == 5:
+                    self.votacionFrame.columnconfigure((0,1,2),weight=1)
+                    self.votacionFrame.rowconfigure((0,1),weight=1)
+                    self.listas[0].grid(row=0,column=0)
+                    self.listas[1].grid(row=0,column=1)
+                    self.listas[2].grid(row=0,column=2)
+                    self.listas[3].grid(row=1,column=0,columnspan=2)
+                    self.listas[4].grid(row=1,column=1,columnspan=2)
+                elif len(self.listas) == 6:
+                    self.votacionFrame.columnconfigure((0,1,2),weight=1)
+                    self.votacionFrame.rowconfigure((0,1),weight=1)
+                    self.listas[0].grid(row=0,column=0)
+                    self.listas[1].grid(row=0,column=1)
+                    self.listas[2].grid(row=0,column=2)
+                    self.listas[3].grid(row=1,column=0)
+                    self.listas[4].grid(row=1,column=1)
+                    self.listas[5].grid(row=1,column=2)
                 self.votacionFrame.grid(row=0,column=0,sticky="nsew")
             elif respuesta == "denegado":
                 messagebox.showwarning("codigo erroneo","El codigo que ingreso no fue aceptado, intente de nuevo")
@@ -167,6 +168,9 @@ class App(customtkinter.CTk):
                 if respuesta == "aceptado":
                     messagebox.showinfo("Operacion satisfactoria","El voto fue emitido con exito. Muchas gracias")
                     self.votacionFrame.grid_forget()
+                    for lista in self.listas:
+                        lista.grid_forget()
+                        
                     self.codigoFrame.grid(row=0,column=0,sticky="nsew")
                 elif respuesta == "error":
                     messagebox.showerror("error del servidor","ocurrio un error en el servidor. Por favor notifiquelo a las autoridades de la sala")
@@ -189,10 +193,10 @@ class listaFrame(customtkinter.CTkFrame):
         imagenLabel = customtkinter.CTkLabel(self,image=imagen,text="")
         imagenLabel.bind("<Button-1>",self.clickHandle)
         imagenLabel.grid(row=0,column=0,pady=10,padx=10)
-        label = customtkinter.CTkLabel(self,text=titulo,font=("Arial Rounded MT Bold",72*size),width=500*size)
+        label = customtkinter.CTkLabel(self,text=titulo,font=("Arial",72*size),width=500*size)
         label.bind("<Button-1>",self.clickHandle)
         label.grid(row=1,column=0,padx=10)
-        label = customtkinter.CTkLabel(self,text=subtitulo,font=("Arial Rounded MT Bold",26*size),width=500*size)
+        label = customtkinter.CTkLabel(self,text=str(subtitulo),font=("Arial",26*size),width=500*size)
         label.bind("<Button-1>",self.clickHandle)
         label.grid(row=2,column=0,pady=(0,10),padx=10)
         
