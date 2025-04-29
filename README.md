@@ -1,2 +1,2 @@
 # votacion
-Survey system on a LAN with a server
+voting system on a LAN using a central server
